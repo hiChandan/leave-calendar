@@ -19,7 +19,7 @@ changed from /api/members to api/members
 nginx.config
 
 location /leave-calendar/ {
-proxy_pass http://10.157.251.38:5050/leave-calendar/;
+proxy_pass http://10.x.x.x:5050/leave-calendar/;
 proxy_http_version 1.1;
 
                 proxy_set_header Upgrade $http_upgrade;
@@ -34,7 +34,7 @@ proxy_http_version 1.1;
 
     # ---- NEXT.JS STATIC FILES (CRITICAL) ----
     location /leave-calendar/_next/ {
-        proxy_pass http://10.157.251.38:5050/leave-calendar/_next/;
+        proxy_pass http://10.x.x.x:5050/leave-calendar/_next/;
         proxy_http_version 1.1;
 
         proxy_set_header Host $host;
@@ -46,7 +46,7 @@ proxy_http_version 1.1;
 
     # ---- PUBLIC ASSETS (optional but good) ----
     location /leave-calendar/public/ {
-        proxy_pass http://10.157.251.38:5050/leave-calendar/public/;
+        proxy_pass http://10.x.x.x:5050/leave-calendar/public/;
     }
 
 export default nextConfig;
