@@ -64,11 +64,14 @@ export default function LeaveCalendar({
     name: month,
     value: `${index}`,
   }));
-  // const pendingScroll = useRef<{ month: number; day: number } | null>(null);
-
-  // useEffect(() =>
-  //   // dayRefs.current = [];
-  // }, [year, events]);`
+ 
+  useEffect(() => {
+    const now = new Date();
+    setToday(now);
+    setYear(now.getFullYear());
+    console.log("loaded from useEffect SET today ", now);
+  }, []);
+  
 
   const scrollToDay = (monthIndex: number, dayIndex: number) => {
     // console.log(
@@ -128,24 +131,19 @@ export default function LeaveCalendar({
 
   const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const monthIndex = parseInt(event.target.value, 10);
-    // console.log("monthIndex3", monthIndex)
     setSelectedMonth(monthIndex);
     scrollToDay(monthIndex, 1);
   };
   const nameLimit = 7;
   const handleTodayClick = () => {
-    // console.log("Called handleTodayCLick")
     setYear(today.getFullYear());
     scrollToDay(today.getMonth(), today.getDate());
   };
 
   useLayoutEffect(() => {
-    const now = new Date();
-    setToday(now);
-    setYear(now.getFullYear());
-    scrollToDay(now.getMonth(), now.getDate());
-    console.log("loaded from useLayoutEffect  today ", now);
-  }, []);
+    scrollToDay(today.getMonth(), today.getDate());
+    console.log("loaded from useLayoutEffect  today ", today);
+  }, [today, year, events]);
 
   const generateCalendar = useMemo(() => {
     const daysInYear = (): { month: number; day: number }[] => {
