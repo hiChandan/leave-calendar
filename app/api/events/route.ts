@@ -21,9 +21,24 @@ export async function POST(req: Request) {
 
   const body = await req.json();
   if (!body.memberId || !body.name || !body.startDate || !body.endDate) {
-    return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    return NextResponse.json({ message: "Missing fields" }, { status: 400 });
   }
-
+  const now = new Date();
+  now.setDate(now.getDate() - 1);
+  if (new Date(body.startDate) < now ) {
+    return NextResponse.json(
+      { message: "Start date cannot be in the past" },
+      { status: 400 }
+    );
+  }
+  now.setFullYear(now.getFullYear() + 1);
+  if (new Date(body.endDate) > now) {
+    return NextResponse.json(
+      { message: "End date cannot be more than one year from today" },
+      { status: 400 }
+    );
+  }
+ 
   const conflict = await Event.findOne({
     memberId: body.memberId,
     $or: [
