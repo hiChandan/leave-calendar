@@ -7,6 +7,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { isLoggedIn, login, getUsername } from "@/lib/auth";
 
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const monthNames = [
@@ -24,11 +25,13 @@ const monthNames = [
   "December",
 ];
 
+
 type LeaveEvent = {
   id: string;
   name: string;
   startDate: string;
   endDate: string;
+  createdBy: string;
 };
 
 type LeaveCalendarProps = {
@@ -60,18 +63,29 @@ export default function LeaveCalendar({
   const dayRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState<number>(0);
+  const [showLogin, setShowLogin] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
   const monthOptions = monthNames.map((month, index) => ({
     name: month,
     value: `${index}`,
   }));
- 
+
   useEffect(() => {
+    if (!isLoggedIn()) {
+      setShowLogin(true);
+    }
+    const savedUser = getUsername();
+    if (savedUser) {
+      setUsername(savedUser);
+    }
     const now = new Date();
     setToday(now);
     setYear(now.getFullYear());
     console.log("loaded from useEffect SET today ", now);
   }, []);
-  
+
 
   const scrollToDay = (monthIndex: number, dayIndex: number) => {
     // console.log(
@@ -141,6 +155,7 @@ export default function LeaveCalendar({
   };
 
   useLayoutEffect(() => {
+
     scrollToDay(today.getMonth(), today.getDate());
     console.log("loaded from useLayoutEffect  today ", today);
   }, [today, year, events]);
@@ -197,18 +212,18 @@ export default function LeaveCalendar({
 
           const dayEvents = cellDate
             ? events.filter((event) => {
-                const start = new Date(event.startDate);
-                const end = new Date(event.endDate);
+              const start = new Date(event.startDate);
+              const end = new Date(event.endDate);
 
-                // normalize time
-                start.setHours(0, 0, 0, 0);
-                end.setHours(23, 59, 59, 999);
-                cellDate.setHours(12, 0, 0, 0);
-                // if (cellDate >= start && cellDate <= end) {
-                //   console.log("RANGE CHECK Continuous 177", cellDate, start, end);
-                // }
-                return cellDate >= start && cellDate <= end;
-              })
+              // normalize time
+              start.setHours(0, 0, 0, 0);
+              end.setHours(23, 59, 59, 999);
+              cellDate.setHours(12, 0, 0, 0);
+              // if (cellDate >= start && cellDate <= end) {
+              //   console.log("RANGE CHECK Continuous 177", cellDate, start, end);
+              // }
+              return cellDate >= start && cellDate <= end;
+            })
             : [];
           if (isToday) console.log(day, month, year);
 
@@ -363,7 +378,57 @@ export default function LeaveCalendar({
   }, []);
 
   return (
+
+
     <div className="calendar-container h-[95vh] overflow-y-scroll no-scrollbar rounded-t-2xl bg-white pb-10 text-slate-800 shadow-xl">
+      {showLogin && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+            <h2 className="mb-1 text-xl font-semibold text-slate-800">
+              Welcome back
+            </h2>
+            <p className="mb-5 text-sm text-slate-500">
+              Sign in to continue to Leave Calendar
+            </p>
+
+            <div className="space-y-4">
+              <input
+                autoFocus
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+              />
+
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+              />
+
+              <button
+                onClick={() => {
+                  // Put real logic below
+                  if (username && password && username == password) {
+                    login(username);
+                    setShowLogin(false);
+                  } else {
+                    alert("Invalid credentials");
+                  }
+                }}
+                className="mt-2 w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 py-2.5 text-sm font-semibold text-white shadow-md transition hover:from-cyan-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+              >
+                Sign in
+              </button>
+            </div>
+          </div>
+        </div>
+      )
+      }
+
       <div className="sticky top-0 z-50 bg-white px-5 pt-7 sm:px-8 sm:pt-8">
         {" "}
         <div className="mb-4 flex w-full flex-wrap items-center justify-between gap-6">
@@ -393,6 +458,11 @@ export default function LeaveCalendar({
           <div className="absolute right-4 top-2 text-[10px] text-slate-300">
             Build by Chandan Chauhan
           </div>
+          {username && (
+            <div className="ml-auto flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm">
+              {username}
+            </div>
+          )}
 
           <div className="flex w-fit items-center justify-between">
             <button
@@ -417,6 +487,7 @@ export default function LeaveCalendar({
                 />
               </svg>
             </button>
+
             <h1 className="min-w-16 text-center text-lg font-semibold sm:min-w-20 sm:text-xl">
               {year}
             </h1>

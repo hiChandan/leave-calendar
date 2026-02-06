@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-
+import {getUsername} from "@/lib/auth";
 export default function EventModal({ onSave, onClose }) {
   const todayISO = new Date().toISOString().split("T")[0];
 
@@ -26,6 +26,7 @@ export default function EventModal({ onSave, onClose }) {
           name: members.find((m) => m.id === memberId)?.name,
           startDate,
           endDate,
+          createdBy: getUsername(),
         }),
       });
       const data = await res.json();

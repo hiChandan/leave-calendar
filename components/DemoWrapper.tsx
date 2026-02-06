@@ -29,6 +29,7 @@ type CalendarEvent = {
   name: string;
   startDate: string;
   endDate: string;
+  createdBy: string;
 };
 
 export default function DemoWrapper() {
